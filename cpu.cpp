@@ -5,6 +5,7 @@
 #include<stdint.h>
 
 using Byte = std::string;
+using namespace std;
 
 /*Control Unit*/
 class CU{
@@ -18,8 +19,8 @@ class CU{
         }
     }
     /*gets the opcode from current instruction*/
-    void get_opcode(std::vector<Byte>&ram,int row){
-        opcode=ram[row].substr(5,4);/*from the 5th character extract 4 characters*/
+    void get_opcode(vector<vector<Byte>>&ram,int row){
+        opcode=ram[row][1].substr(0,4);/*from the 5th character extract 4 characters*/
     }
     
     
@@ -47,7 +48,7 @@ class MAR{
 class MDR{
     public:
     Byte contents;
-    void memory_read(std::vector<Byte> &ram,int row){
+    void memory_read(vector<vector<Byte>> &ram,int row){
             contents=ram[row][1];
         
     }
@@ -58,11 +59,11 @@ class MDR{
 class PC{
     public:
     Byte address;
-    void increment(std::vector<Byte>&ram,int row){
+    void increment(vector<vector<Byte>>&ram,int row){
         row=row+1;
         address=ram[row][0];
     }
-    PC(std::vector<Byte>&ram,int row){
+    PC(std::vector<vector<Byte>>&ram,int row){
         address= ram[row][0];
     }
 };
@@ -89,30 +90,30 @@ class ACC{
 /*Arithmetic logical unit*/
 class ALU{
     public:
-    std::vector<Byte>instruction={};
+    vector<Byte>instruction={};
     uint8_t num_one=0;
     uint8_t num_two=0;
-    std::vector<uint8_t>weights={1,2,4,8};
-    std::vector<Byte>binary_one={};
-    std::vector<Byte>binary_two={};
-    std::vector<Byte> letters={{"10","A"},{"11","B"},{"12","C"},{"13","D"},{"14","E"},{"15","F"}};
+    vector<uint8_t>weights={1,2,4,8};
+    vector<Byte>binary_one={};
+    vector<Byte>binary_two={};
+    vector<Byte> letters={{"10","A"},{"11","B"},{"12","C"},{"13","D"},{"14","E"},{"15","F"}};
     /*converting data into hexedecimal*/
     void convert(Byte contents){
         /*spliting binary numbers in half*/
         int i;
-        for(i=0;i<5;i++){
+        for(i=0;i<4;i++){
             binary_one[i]=contents.substr(i,1);    
         }
-        for(i=4;i<9;i++){
+        for(i=4;i<8;i++){
             binary_one[i]=contents.substr(i,1);
         }
         /*convereting each half of the number to deneray*/
-        for( i=0;i<=sizeof(binary_one)/sizeof(Byte);i++){
+        for( i=0;i<sizeof(binary_one)/sizeof(Byte);i++){
             if(binary_one[i]=="1"){
                 num_one=num_one+weights[i];
             }
         }
-        for( i=0;i<=sizeof(binary_two)/sizeof(Byte);i++){
+        for( i=0;i<sizeof(binary_two)/sizeof(Byte);i++){
             if(binary_two[i]=="1"){
                 num_two=num_two+weights[i];
             }
@@ -143,8 +144,8 @@ class ALU{
 
 int main(){
     int row=0;
-    std::vector<Byte> ram={{"0xC760","10001010"},{"0xH890","0011010"},{"0x5I21","11110000"},{"0xP782","10010101"},{"0x901F","11001111"}};
-    PC pc(ram,0);
+    vector<vector<Byte>>ram{{"1111","10001010"},{"1010","00110101"},{"1011","11110000"},{"1110","10010101"},{"1000","11001111"}};
+    PC pc(ram,row);
     MAR mar;
     MDR mdr;
     CIR cir;
@@ -162,11 +163,11 @@ int main(){
 
         /*Decoding*/
         cu.get_opcode(ram,row);
-        Byte operand=ram[row].substr(9,4); /*from the 9th character get 4 characters*/
+        Byte operand=ram[row][1].substr(4,4); /*from the 9th character get 4 characters*/
         /*Executing*/
         mar.copy_address(operand);
-        for(int i=0; i<=sizeof(ram)/sizeof(Byte);i++){
-            if(ram[i].substr(0,4)==mar.copied_address){
+        for(int i=0; i<sizeof(ram)/sizeof(Byte);i++){
+            if(ram[i][0]==mar.copied_address){
                 mdr.memory_read(ram,i);
                 break;
             }
@@ -177,12 +178,8 @@ int main(){
         alu.convert(acc.contents);
         std::cout<<"Processed";
       
-    } else{
-        std::cout<<"failed process";
     }
     return 0;
 
 }
-
-
 
