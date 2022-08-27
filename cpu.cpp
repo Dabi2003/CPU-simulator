@@ -20,11 +20,9 @@ class CU{
     }
     /*gets the opcode from current instruction*/
     void get_opcode(vector<vector<Byte>>&ram,int row){
-        opcode=ram[row][1].substr(0,4);/*from the 5th character extract 4 characters*/
+        opcode=ram[row][1].substr(0,4);/*from the 1st character extract 4 characters*/
     }
-    
-    
-    
+      
 
 };
 /*Memory data register*/
@@ -90,21 +88,21 @@ class ACC{
 /*Arithmetic logical unit*/
 class ALU{
     public:
-    vector<Byte>instruction={};
-    uint8_t num_one=0;
-    uint8_t num_two=0;
-    vector<uint8_t>weights={1,2,4,8};
+    vector<Byte>instruction;
+    int num_one=0;
+    int num_two=0;
+    vector<int>weights={1,2,4,8};
     vector<Byte>binary_one={};
     vector<Byte>binary_two={};
-    vector<Byte> letters={{"10","A"},{"11","B"},{"12","C"},{"13","D"},{"14","E"},{"15","F"}};
+    vector<vector<Byte>>letters={{"10","A"},{"11","B"},{"12","C"},{"13","D"},{"14","E"},{"15","F"}};
     /*converting data into hexedecimal*/
     void convert(Byte contents){
         /*spliting binary numbers in half*/
         int i;
-        for(i=0;i<4;i++){
+        for(i=0;i<5;i++){
             binary_one[i]=contents.substr(i,1);    
         }
-        for(i=4;i<8;i++){
+        for(i=4;i<9;i++){
             binary_one[i]=contents.substr(i,1);
         }
         /*convereting each half of the number to deneray*/
@@ -121,7 +119,7 @@ class ALU{
         /*checking if the deneray number is greater than 9 so we use hex letters and adding the hex digit into the instruction array*/
         if(num_one>9){
             for(i=0;i<6;i++){
-                if(num_one==(uint8_t)letters[i][0]){
+                if(num_one=stoi(letters[i][0])){
                     instruction[0]=letters[i][1];
                 }
             }
@@ -131,7 +129,7 @@ class ALU{
         
         if(num_two>9){
             for(i=0;i<6;i++){
-                if(num_two==(uint8_t)letters[i][0]){
+                if(num_two==(stoi(letters[i][0]))){
                     instruction[1]=letters[i][1];
                 }
             }
@@ -151,22 +149,22 @@ int main(){
     CIR cir;
     CU cu;
     ACC acc;
-    ALU alu;
+    ALU alu;  
     /*Fetching*/
     mar.copy_address(pc.address);
     mar.get_contents();
     cu.read_signal(mar.signal);
-    if(cu.signal==1){
+   if(cu.signal==1){
         mdr.memory_read(ram,row);
         cir.copy_contents(mdr.contents);
         pc.increment(ram,row);
 
         /*Decoding*/
-        cu.get_opcode(ram,row);
-        Byte operand=ram[row][1].substr(4,4); /*from the 9th character get 4 characters*/
+       cu.get_opcode(ram,row);
+        Byte operand=ram[row][1].substr(4,4); /*from the 4th character get 4 characters*/
         /*Executing*/
-        mar.copy_address(operand);
-        for(int i=0; i<sizeof(ram)/sizeof(Byte);i++){
+       mar.copy_address(operand);
+        for(int i=0; i<sizeof(ram)/sizeof(ram[0]);i++){
             if(ram[i][0]==mar.copied_address){
                 mdr.memory_read(ram,i);
                 break;
@@ -182,6 +180,8 @@ int main(){
     return 0;
 
 }
+
+
 
 
 
